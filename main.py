@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 import logging
 import hashlib
 from app.setting import LOGGING_SETTING, LOGGING_LEVEL
 from app.packages.workflow import Workflow3
 from app.dictionary import Dictionary
+from app.config import APPKEY, APPSECRET
+from app.packages.workflow.notify import notify
 
 # 指定编码解码方式
 reload(sys)
@@ -20,7 +23,17 @@ def encrypt(data):
     return data_hash.hexdigest()
 
 
+def open_editor(file_path):
+    os.system('open -e "{file}"'.format(file=file_path))
+
+
 def main(workflow):
+    # 检查存储配置信息
+    if not all((APPKEY, APPSECRET)):
+        notify('⚠️ 警告', '请先设置好相关配置信息！')
+        open_editor('app/config.py')
+        return
+
     args = workflow.args
     if 0 < len(args):
         query = ' '.join(args)
